@@ -1,0 +1,40 @@
+@vehicle_service_url = https://dev-vehicle-ab33877f.azurewebsites.net
+@insurance_service_url = https://dev-insurance-ab33877f.azurewebsites.net
+@userId = 33333333-3333-3333-3333-333333333333
+@policyId = 55555555-5555-5555-5555-555555555555
+
+### Create a new vehicle
+# @name createVehicle
+POST {{vehicle_service_url}}/vehicles
+Content-Type: application/json
+
+{
+  "vin": "1HGCM82633A{{$randomInt 100000 999999}}",
+  "make": "Honda",
+  "model": "Accord",
+  "year": {{$randomInt 2015 2024}},
+  "licensePlate": "ABC{{$randomInt 1000 9999}}"
+}
+
+###
+
+### Create insurance using the created vehicle
+POST {{insurance_service_url}}/insurances
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "policyId": "{{policyId}}",
+  "vehicleId": "{{createVehicle.response.body.id}}",
+  "startDate": "{{$datetime iso8601}}",
+  "endDate": "{{$datetime iso8601 1 y}}",
+  "renewalDate": "{{$datetime iso8601 1 y}}",
+  "coverageIds": [
+    "33333333-3333-3333-3333-333333333333",
+    "44444444-4444-4444-4444-444444444444"
+  ],
+  "deductible": 0,
+  "notes": "Charlie Brown insurance with both coverages"
+}
+
+###
