@@ -36,7 +36,7 @@ graph TB
         EMAIL_SVC[Azure Communication Services<br/>Email Delivery]
         SMS_SVC[Azure Communication Services<br/>SMS Delivery]
         STORAGE[(Azure Storage<br/>Templates & Attachments)]
-        AI[Application Insights<br/>Telemetry)]
+        AI[Application Insights<br/>Telemetry]
     end
 
     SB_EMAIL --> NOTIFICATION_FUNC

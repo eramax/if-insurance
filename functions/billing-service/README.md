@@ -41,7 +41,7 @@ graph TB
         SQL_DB[(Azure SQL Database<br/>Insurance Data)]
         STORAGE[(Azure Storage<br/>Invoice PDFs)]
         SB_OUT[Service Bus Output<br/>Email Queue]
-        AI[Application Insights<br/>Telemetry)]
+        AI[Application Insights<br/>Telemetry]
     end
 
     TIMER --> PROC_ALL
