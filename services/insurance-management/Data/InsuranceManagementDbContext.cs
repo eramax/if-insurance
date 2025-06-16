@@ -365,8 +365,7 @@ namespace InsuranceManagement.Data
                     UpdatedAt = insuranceStart2
                 }
             );
-        }
-        private void ConfigureAuditFields(ModelBuilder modelBuilder)
+        }        private void ConfigureAuditFields(ModelBuilder modelBuilder)
         {
             // Configure audit fields for all BaseEntity derived entities
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -375,12 +374,9 @@ namespace InsuranceManagement.Data
                 {
                     modelBuilder.Entity(entityType.ClrType, builder =>
                     {
-                        // Use datetime('now') for SQLite compatibility instead of GETUTCDATE()
-                        builder.Property(nameof(BaseEntity.CreatedAt))
-                            .HasDefaultValueSql("datetime('now')");
-
-                        builder.Property(nameof(BaseEntity.UpdatedAt))
-                            .HasDefaultValueSql("datetime('now')");
+                        // Audit fields configured without default values
+                        builder.Property(nameof(BaseEntity.CreatedAt));
+                        builder.Property(nameof(BaseEntity.UpdatedAt));
                     });
                 }
             }

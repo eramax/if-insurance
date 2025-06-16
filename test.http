@@ -1,6 +1,7 @@
-@vehicle_service_url = https://dev-vehicle-ab33877f.azurewebsites.net
-@insurance_service_url = https://dev-insurance-ab33877f.azurewebsites.net
+@vehicle_service_url = https://dev-vehicle-bbbc09c5.azurewebsites.net
+@insurance_service_url = https://dev-insurance-bbbc09c5.azurewebsites.net
 @userId = 33333333-3333-3333-3333-333333333333
+@personalId = U1003
 @policyId = 55555555-5555-5555-5555-555555555555
 
 ### Create a new vehicle
@@ -36,5 +37,11 @@ Content-Type: application/json
   "deductible": 0,
   "notes": "Charlie Brown insurance with both coverages"
 }
+
+###
+
+### Get user insurances by personal ID
+GET {{insurance_service_url}}/insurances/user/{{personalId}}
+Content-Type: application/json
 
 ###
