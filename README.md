@@ -83,9 +83,7 @@ insurance-management-system/
 │   ├── 📁 vehicle-insurance-Tests/
 │   └── 📁 IntegrationTests/
 ├── 📄 insurance-management-system.sln  # Visual Studio solution
-├── 📄 release.sh                   # Production deployment script
-├── 📄 optimize-and-deploy.sh       # Optimized build and deployment
-└── 📄 Task.md                      # Project specifications
+└── 📄 release.sh                   # Production deployment script
 ```
 
 ## 🚀 Core Features
@@ -314,10 +312,7 @@ graph LR
 cd infrastructure
 ./deploy.sh <resource-group-name> <stage>
 
-# 2. Deploy all services (optimized build)
-./optimize-and-deploy.sh <resource-group-name> <insurance-app-name>
-
-# 3. Production deployment
+# 2. Production deployment
 ./release.sh <resource-group-name> <stage>
 ```
 
@@ -333,15 +328,6 @@ The Bicep template deploys:
 - App Service Plans (Linux)
 - Function Apps with connection string authentication
 
-### Build Optimization
-
-The deployment scripts include:
-
-- **ReadyToRun compilation**: Faster startup times
-- **Assembly trimming**: Reduced package size
-- **Single-file publishing**: Simplified deployment
-- **Size comparison**: Before/after optimization metrics
-
 ## 🔐 Security Features
 
 - **Connection String Authentication**: Azure resources authentication via connection strings
@@ -351,7 +337,7 @@ The deployment scripts include:
 
 ## 📈 Performance Characteristics
 
-### Database Optimization
+### Database
 
 - **Connection Pooling**: Efficient database connections
 - **Retry Policies**: Resilient database operations
