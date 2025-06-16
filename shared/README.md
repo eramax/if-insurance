@@ -111,11 +111,9 @@ erDiagram
         string PostalCode
         string City
         bool IsActive
-    }
-
-    Policy {
+    }    Policy {
         string Name
-        PolicyType PolicyType "Health, Vehicle, Pet"
+        PolicyType PolicyType "Vehicle (Health, Pet defined but not implemented)"
         string Description
         string InsuranceCompany
         string TermsAndConditions

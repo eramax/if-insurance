@@ -76,12 +76,10 @@ erDiagram
         datetime CreatedAt
         datetime UpdatedAt
         bool IsActive
-    }
-
-    Policy {
+    }    Policy {
         int Id PK
         string Name
-        PolicyType PolicyType "Health, Vehicle, Pet"
+        PolicyType PolicyType "Vehicle only - Health/Pet defined but not implemented"
         string Description
         string InsuranceCompany
         string TermsAndConditions
@@ -156,7 +154,7 @@ erDiagram
 - **Azure SQL Database**: Primary data storage with connection pooling
 - **Azure Service Bus**: Message-driven communication
 - **Application Insights**: Telemetry and monitoring
-- **Azure Storage**: Document and file management
+- **Azure Storage**: Document and file management (configured but not actively used)
 
 ## 🌐 API Endpoints
 
@@ -256,16 +254,15 @@ sequenceDiagram
 
     API->>SVC: Create Insurance
     SVC->>SVC: Validate & Save
-    SVC->>SB: Publish Insurance Created Event
+    SVC->>SB: Publish Invoice Generation Message
     SB->>BILLING: Trigger Billing Setup
     SVC->>API: Return Insurance Details
 ```
 
 ### Message Types
 
-- **Insurance Created**: New insurance policy activation
-- **Insurance Updated**: Changes to existing policies
-- **Insurance Cancelled**: Policy termination events
+- **Invoice Generation**: Triggers billing function for new policies
+- **Email Notification**: Sends email notifications via notification service
 
 ## 🔍 Monitoring & Observability
 
@@ -307,7 +304,7 @@ dotnet restore
 # Start the service
 dotnet run --project insurance-management.csproj
 
-# Service will be available at https://localhost:8080
+# Service will be available at http://localhost:5223 (default port)
 ```
 
 ### Docker Support
@@ -385,9 +382,9 @@ public async Task CreateInsurance_ValidRequest_ReturnsInsuranceDto()
 
 ### Authentication & Authorization
 
-- **Managed Identity**: Azure resource authentication
-- **Bearer Token**: API endpoint security
-- **Role-Based Access**: User permission management
+- **Connection String Authentication**: Azure resource authentication via connection strings
+- **Bearer Token**: API endpoint security (if implemented)
+- **Application-Level Access**: Basic service access control
 
 ### Data Protection
 
@@ -488,7 +485,7 @@ builder.Services.AddHealthChecks()
 
 ## 📞 Support Information
 
-- **Port**: 8080
+- **Default Port**: 5223 (configurable in launchSettings.json)
 - **Health Check**: `/health`
 - **Documentation**: `/swagger` (Development only)
 - **Logs**: Application Insights

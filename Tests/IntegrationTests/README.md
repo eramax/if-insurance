@@ -26,10 +26,10 @@ This project contains integration tests for the Insurance Management System serv
 All tests failed due to connection issues with the target services:
 
 - **Error**: `No connection could be made because the target machine actively refused it. (localhost:7001)`
-- **Root Cause**: Services are not running on expected ports
+- **Root Cause**: Services are not running on expected ports (Integration tests expect ports 7001/7002, but actual services run on ports 5223/52864)
 - **Required Services**:
-  - Vehicle Service (localhost:7001)
-  - Insurance Service (localhost:7002)
+  - Vehicle Service (expected: localhost:7001, actual: localhost:52864)
+  - Insurance Service (expected: localhost:7002, actual: localhost:5223)
 
 ### Failed Tests
 
@@ -56,8 +56,8 @@ All tests failed due to connection issues with the target services:
 
 ### Service Dependencies
 
-1. **Vehicle Service**: Must be running on `localhost:7001`
-2. **Insurance Service**: Must be running on `localhost:7002`
+1. **Vehicle Service**: Must be running on `localhost:7001` (or update test config to use actual port `localhost:52864`)
+2. **Insurance Service**: Must be running on `localhost:7002` (or update test config to use actual port `localhost:5223`)
 
 ### Starting Services Locally
 
@@ -99,6 +99,8 @@ The tests are configured through `appsettings.json` with the following settings:
 }
 ```
 
+**Note**: The URLs above use ports 7001/7002, but the actual services run on different ports (52864 for Vehicle, 5223 for Insurance). Update the URLs to match your actual service configuration.
+
 **Important**: Update the URLs in `appsettings.json` to point to your actual deployed services or running local services before running the tests.
 
 For Azure-deployed services, you can use the provided `appsettings.azure.json` as a template and rename it to `appsettings.json`.
@@ -138,22 +140,25 @@ run-tests.bat
 
 If tests fail with "connection refused" errors:
 
-1. **Check Service Status**: Ensure both services are running
+1. **Check Service Status**: Ensure both services are running 
+```bash
 
-   ```bash
-   # Check if services are listening on expected ports
+   # Check if services are listening on expected ports (7001/7002) or actual ports (52864/5223)
+
    netstat -an | findstr :7001
    netstat -an | findstr :7002
+   netstat -an | findstr :52864
+   netstat -an | findstr :5223
+
    ```
 
 2. **Verify Service URLs**: Confirm services are accessible
-
    ```bash
-   curl http://localhost:7001/vehicles
-   curl http://localhost:7002/insurance
+   curl http://localhost:52864/vehicles
+   curl http://localhost:5223/insurances
    ```
 
-3. **Update Configuration**: Modify `appsettings.json` if services run on different ports
+3. **Update Configuration**: Modify `appsettings.json` to use actual service ports instead of expected ports 7001/7002
 
 ### Common Issues
 
@@ -184,14 +189,13 @@ If tests fail with "connection refused" errors:
 - Each test is isolated and doesn't depend on other tests
 - Test data includes sample vehicles and insurance policies
 
-````
 
 ### Run Specific Test Class
 
 ```bash
 dotnet test Tests/IntegrationTests/IntegrationTests.csproj --filter "VehicleServiceIntegrationTests"
 dotnet test Tests/IntegrationTests/IntegrationTests.csproj --filter "InsuranceServiceIntegrationTests"
-````
+```
 
 ### Run Specific Test Method
 

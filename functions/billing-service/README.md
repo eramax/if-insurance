@@ -88,30 +88,31 @@ The solution follows clean architecture principles with separation of concerns:
 
 The service uses the following configuration parameters from `appsettings.json`:
 
-- `SqlConnectionString`: SQL database connection string
+- `SqlConnectionString`: SQL Server database connection string
 - `SqlDatabaseName`: SQL database name
 - `ServiceBusConnectionString`: Azure Service Bus connection string
 - `ServiceBusNamespace`: Azure Service Bus namespace
-- `SvbusInvoiceGenQueueName`: Queue name for processing single insurance billing requests
-- `SvbusInvoiceEmailQueueName`: Queue name for sending email notifications with invoices
+- `SvbusInvoiceGenQueueName`: Queue name for processing single insurance billing requests (`invoice-generation-queue`)
+- `SvbusInvoiceEmailQueueName`: Queue name for sending email notifications with invoices (`invoice-email-notification-queue`)
 - `StorageAccountConnectionString`: Azure Storage connection string for storing invoice PDFs
-- `InvoicesContainerName`: Blob container name for storing invoice PDFs
+- `InvoicesContainerName`: Blob container name for storing invoice PDFs (`invoices`)
 - `APPLICATIONINSIGHTS_CONNECTION_STRING`: Application Insights connection string for telemetry
 
 ## Local Development
 
 ### Prerequisites
 
-- .NET 9 SDK
+- .NET 8 SDK
 - Azure Functions Core Tools
-- Access to the shared Azure PostgreSQL instance.
-- Connection string for the database and Service Bus (e.g., in `local.settings.json`).
+- Access to the shared Azure SQL Database instance
+- Connection string for the database and Service Bus (e.g., in `local.settings.json`)
 
 ### Running the Function Locally
 
-- Navigate to the function directory: `cd services/functions/billing-service`
+- Navigate to the function directory: `cd functions/billing-service`
 - Start the function host: `func start`
-- You can trigger TimerTrigger functions manually for testing via the Functions host admin endpoints or by adjusting the schedule for immediate execution in `function.json` (or C# attribute) for local testing.
+- Timer function runs monthly on the 27th at 8:00 AM UTC (`0 0 27 * *`)
+- You can test the Service Bus triggered function by sending messages to the configured queue
 
 ### Testing Procedures
 
@@ -121,23 +122,24 @@ The service uses the following configuration parameters from `appsettings.json`:
 
 ## Deployment
 
-- **Azure DevOps Pipeline**: Deployed as part of the serverless functions deployment, likely managed by Bicep templates for the Function App and related resources.
-- **Infrastructure**: Defined in Bicep (`functions/billing-service/function.bicep` or a shared functions Bicep module), including:
-  - Azure Function App (Consumption Plan)
-  - Application Insights integration
-  - Managed Identity for database access
-  - Configuration for Service Bus connection string.
-- **Environment Configuration**: Application settings in Azure Function App configuration (e.g., database connection, Service Bus queue name).
+- **Infrastructure**: Deployed via Bicep templates as part of the infrastructure deployment
+- **Function App**: Windows hosting with .NET 8 runtime
+- **Application Insights**: Integrated for monitoring and telemetry
+- **Connection String Authentication**: Configured for secure access to Azure resources via connection strings
+- **Environment Configuration**: Application settings configured via Bicep deployment
 
 ## Error Handling, Extensibility, and Security
 
 - **Error Handling**:
-  - Try-catch blocks for critical operations (DB query, message sending).
-  - Logging to Application Insights.
-  - Dead-lettering is primarily handled by the message consumer (`InvoiceGeneratorFunction`), but the scheduler ensures messages are sent reliably.
+  - Try-catch blocks for critical operations (DB query, message sending)
+  - Logging to Application Insights
+  - Dead-lettering handled by Service Bus for failed message processing
 - **Extensibility**:
-  - The query for active insurances can be modified if criteria change.
-  - Configuration for CRON schedule and queue names should be externalized.
+  - Configurable CRON schedule for timer trigger
+  - Queue names externalized in configuration
+  - Modular service design for easy enhancement
 - **Security**:
-  - Managed Identity for accessing Azure PostgreSQL and Azure Service Bus.
-  - Service Bus connection strings stored securely in Function App settings.
+  - HTTPS-only communication
+  - Connection string authentication for accessing Azure resources
+  - Service Bus connection strings stored securely in Function App settings
+  - Virtual Network integration for network isolation

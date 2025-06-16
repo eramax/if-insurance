@@ -1,16 +1,15 @@
 # Notification Service Function
 
-An Azure Function App responsible for handling email notifications, SMS alerts, and other communication within the Insurance Management System.
+An Azure Function App responsible for handling invoice email notifications and other communication within the Insurance Management System.
 
 ## 🎯 Purpose
 
 This serverless function provides:
 
-- **Email Invoice Notifications**: Automated invoice delivery to customers
-- **Payment Reminders**: Overdue payment notifications
-- **Policy Updates**: Insurance policy change notifications
-- **System Alerts**: Administrative and operational notifications
-- **Multi-Channel Communication**: Email, SMS, and push notification support
+- **Email Invoice Notifications**: Automated invoice delivery notifications (currently logging-based)
+- **Message Processing**: Service Bus triggered message handling
+- **Notification Logging**: Comprehensive logging for notification events
+- **Extensible Design**: Ready for future email/SMS service integration
 
 ## 🏗️ Function Architecture
 
@@ -18,42 +17,28 @@ This serverless function provides:
 graph TB
     subgraph "Function Triggers"
         SB_EMAIL[Service Bus Trigger<br/>Email Notification Queue]
-        SB_SMS[Service Bus Trigger<br/>SMS Notification Queue]
-        SB_ALERT[Service Bus Trigger<br/>System Alert Queue]
     end
 
     subgraph "Function Implementation"
         NOTIFICATION_FUNC[NotificationServiceFunction<br/>Message Processing]
     end
 
-    subgraph "Notification Handlers"
-        EMAIL_HANDLER[EmailNotificationHandler<br/>Email Processing]
-        SMS_HANDLER[SMSNotificationHandler<br/>SMS Processing]
-        TEMPLATE_ENGINE[TemplateEngine<br/>Content Generation]
+    subgraph "Processing Layer"
+        MESSAGE_HANDLER[Message Processing<br/>Basic Notification Handling]
+        LOGGING[Application Logging<br/>Event Tracking]
     end
 
     subgraph "External Services"
-        EMAIL_SVC[Azure Communication Services<br/>Email Delivery]
-        SMS_SVC[Azure Communication Services<br/>SMS Delivery]
-        STORAGE[(Azure Storage<br/>Templates & Attachments)]
         AI[Application Insights<br/>Telemetry]
+        LOGS[Azure Logs<br/>Message Tracking]
     end
 
     SB_EMAIL --> NOTIFICATION_FUNC
-    SB_SMS --> NOTIFICATION_FUNC
-    SB_ALERT --> NOTIFICATION_FUNC
+    NOTIFICATION_FUNC --> MESSAGE_HANDLER
+    NOTIFICATION_FUNC --> LOGGING
 
-    NOTIFICATION_FUNC --> EMAIL_HANDLER
-    NOTIFICATION_FUNC --> SMS_HANDLER
-    NOTIFICATION_FUNC --> TEMPLATE_ENGINE
-
-    EMAIL_HANDLER --> EMAIL_SVC
-    SMS_HANDLER --> SMS_SVC
-    TEMPLATE_ENGINE --> STORAGE
-
-    NOTIFICATION_FUNC --> AI
-    EMAIL_HANDLER --> AI
-    SMS_HANDLER --> AI
+    MESSAGE_HANDLER --> AI
+    LOGGING --> LOGS
 ```
 
 ## 📊 Notification Flow
@@ -63,29 +48,24 @@ sequenceDiagram
     participant BILLING as Billing Service
     participant SB as Service Bus
     participant NOTIFY as Notification Function
-    participant TEMPLATE as Template Engine
-    participant STORAGE as Blob Storage
-    participant EMAIL as Email Service
-    participant CUSTOMER as Customer
+    participant LOGS as Application Logs
+    participant AI as Application Insights
 
     BILLING->>SB: Publish Invoice Notification
     SB->>NOTIFY: Trigger Function
 
-    NOTIFY->>TEMPLATE: Load Email Template
-    TEMPLATE->>STORAGE: Get Template & Assets
-    STORAGE-->>TEMPLATE: Template Content
+    NOTIFY->>LOGS: Log Message Receipt
+    NOTIFY->>AI: Track Notification Event
 
-    NOTIFY->>TEMPLATE: Generate Email Content
-    TEMPLATE-->>NOTIFY: Formatted Email
+    Note over NOTIFY: Basic message processing
+    Note over NOTIFY: Currently logs message content
 
-    NOTIFY->>EMAIL: Send Email
-    EMAIL-->>CUSTOMER: Invoice Email + PDF
+    NOTIFY->>LOGS: Log Processing Complete
+    NOTIFY->>AI: Track Processing Metrics
 
-    NOTIFY->>SB: Log Notification Status
-
-    alt Email Delivery Failed
-        EMAIL-->>NOTIFY: Delivery Failure
-        NOTIFY->>SB: Retry Message
+    alt Processing Error
+        NOTIFY-->>SB: Retry or Dead Letter
+        NOTIFY->>AI: Track Error Event
     end
 ```
 
@@ -101,23 +81,20 @@ sequenceDiagram
 ### Key Dependencies
 
 ```xml
-<PackageReference Include="Azure.Identity" Version="1.14.0" />
 <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.19.0" />
 <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
 <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />
 <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.0.0" />
 <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.22.2" />
-<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
+<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 ```
 
 ### Azure Services Integration
 
 - **Azure Functions**: Serverless compute platform
 - **Azure Service Bus**: Message queuing and triggering
-- **Azure Communication Services**: Email and SMS delivery
-- **Azure Storage Blobs**: Template and asset storage
+- **Azure Storage Blobs**: Configuration and logging support
 - **Application Insights**: Monitoring and telemetry
-- **Azure Key Vault**: Secure configuration management
 
 ## ⚡ Function Definitions
 
@@ -131,9 +108,9 @@ public async Task Run(
     FunctionContext context)
 ```
 
-**Purpose**: Process various notification messages from Service Bus queues
-**Trigger**: Service Bus message (multiple queues supported)
-**Processing**: Route messages to appropriate handlers based on message type
+**Purpose**: Process invoice notification messages from Service Bus queue
+**Trigger**: Service Bus message (`invoice-email-notification-queue`)
+**Processing**: Basic message logging and tracking (ready for email service integration)
 
 ## 📋 Message Types & Processing
 
@@ -511,10 +488,9 @@ public async Task RenderEmailTemplate_ValidData_ReturnsHtml()
 
 ### Access Control
 
-- **Managed Identity**: Azure resource authentication
+- **Connection String Authentication**: Azure resource authentication via connection strings
 - **Function-Level Security**: Function key authentication
-- **Communication Services**: API key protection
-- **Storage Access**: Blob container permissions
+- **Storage Access**: Connection string-based access to blob containers
 
 ### Data Protection
 

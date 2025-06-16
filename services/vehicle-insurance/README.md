@@ -101,19 +101,21 @@ The service uses `appsettings.json` for configuration:
 
 ```json
 {
-  "APPLICATIONINSIGHTS_CONNECTION_STRING": "your-app-insights-connection-string",
-  "SqlConnectionString": "your-sql-server-connection-string",
-  "ConnectionStrings": {
-    "DefaultConnection": "alternative-sql-connection-string"
-  }
+  "APPLICATIONINSIGHTS_CONNECTION_STRING": "",
+  "SqlConnectionString": "",
+  "ServiceBusConnectionString": "",
+  "StorageAccountConnectionString": "",
+  "ServiceBusNamespace": "",
+  "SvbusInvoiceGenQueueName": "invoice-generation-queue",
+  "SvbusInvoiceEmailQueueName": "invoice-email-notification-queue",
+  "InvoicesContainerName": "invoices"
 }
 ```
 
 ### Configuration Priority
 
-1. `ConnectionStrings:DefaultConnection` (preferred)
-2. `SqlConnectionString` (fallback)
-3. In-Memory Database (development/testing)
+1. `SqlConnectionString` (primary configuration key)
+2. In-Memory Database (development/testing when no connection string provided)
 
 ## API Endpoints
 
@@ -130,21 +132,21 @@ The service uses `appsettings.json` for configuration:
 ```json
 {
   "id": "guid",
-  "licensePlate": "string (1-20 chars, required)",
-  "make": "string (1-50 chars, required)",
-  "model": "string (1-50 chars, required)",
-  "year": "integer (1900-2030, required)",
-  "vin": "string (17 chars, required)"
+  "licensePlate": "string (required)",
+  "make": "string (required)",
+  "model": "string (required)",
+  "year": "integer (required)",
+  "vin": "string (required)"
 }
 ```
 
 ## Validation Rules
 
-- **License Plate**: Required, 1-20 characters, must be unique
-- **Make**: Required, 1-50 characters
-- **Model**: Required, 1-50 characters
-- **Year**: Required, between 1900-2030
-- **VIN**: Required, exactly 17 characters, must be unique
+- **License Plate**: Required, must be unique
+- **Make**: Required
+- **Model**: Required
+- **Year**: Required
+- **VIN**: Required, must be unique
 
 ## Error Handling
 
@@ -192,7 +194,8 @@ CREATE UNIQUE INDEX IX_Vehicles_LicensePlate ON Vehicles (LicensePlate);
    ```bash
    dotnet run
    ```
-3. Access Swagger UI: `https://localhost:5001/swagger`
+3. Access Swagger UI: `http://localhost:52864/swagger` (default port)
+4. Access API endpoints: `http://localhost:52864/vehicles`
 
 ### Testing
 
@@ -240,14 +243,3 @@ Logs are automatically sent to Application Insights when configured.
 - SQL injection protection via parameterized queries
 - Error handling that doesn't expose sensitive information
 - HTTPS enforced in production
-
-## Removed Dependencies
-
-This refactored version removes unnecessary dependencies:
-
-- Azure Service Bus (not needed for this service)
-- Azure Storage Account (not needed for this service)
-- Azure Identity (using connection strings for simplicity)
-- Complex configuration classes (simplified to core needs)
-
-The service is now focused, lightweight, and optimized for its specific purpose.

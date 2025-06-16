@@ -1,6 +1,6 @@
 # Insurance Management System
 
-A comprehensive microservices-based insurance management platform built on Azure, designed to handle multiple insurance types (Vehicle, Pet, Health) with automated billing, notifications, and document management capabilities.
+A microservices-based vehicle insurance management platform built on Azure, designed to handle vehicle insurance with automated billing, notifications, and document management capabilities.
 
 ## 🏗️ System Architecture
 
@@ -9,10 +9,6 @@ graph TB
     subgraph "Client Layer"
         WEB[Web Applications]
         API_CLIENT[API Clients]
-    end
-
-    subgraph "API Gateway Layer"
-        APIM[Azure API Management]
     end
 
     subgraph "Microservices Layer"
@@ -39,13 +35,12 @@ graph TB
 
     subgraph "Infrastructure"
         VNET[Virtual Network<br/>Security & Isolation]
-        KV[Key Vault<br/>Secrets Management]
     end
 
-    WEB --> APIM
-    API_CLIENT --> APIM
-    APIM --> IMS
-    APIM --> VIS
+    WEB --> IMS
+    API_CLIENT --> IMS
+    WEB --> VIS
+    API_CLIENT --> VIS
 
     IMS --> SQL
     VIS --> SQL
@@ -95,9 +90,9 @@ insurance-management-system/
 
 ## 🚀 Core Features
 
-### Insurance Management
+### Vehicle Insurance Management
 
-- **Multi-Type Support**: Vehicle, Pet, and Health insurance
+- **Vehicle Insurance**: Comprehensive vehicle insurance coverage and management
 - **Coverage Plans**: Modular basic and complementary coverage tiers
 - **Policy Management**: Template-based policy creation and management
 - **Claims Processing**: Incident reporting and settlement tracking
@@ -133,9 +128,7 @@ insurance-management-system/
 - **Azure Storage Account**: Document and file storage
 - **Azure Service Bus**: Message queuing and integration
 - **Azure Application Insights**: Monitoring and telemetry
-- **Azure API Management**: API gateway and management
 - **Azure Virtual Network**: Network security and isolation
-- **Azure Key Vault**: Secrets and configuration management
 
 ### Infrastructure
 
@@ -258,18 +251,16 @@ erDiagram
   "SqlConnectionString": "Server=...;Database=...;",
   "StorageAccountConnectionString": "DefaultEndpointsProtocol=https;...",
   "ServiceBusConnectionString": "Endpoint=sb://...;",
-  "ApplicationInsightsConnectionString": "InstrumentationKey=...",
-  "KeyVaultEndpoint": "https://<keyvault-name>.vault.azure.net/"
+  "ApplicationInsightsConnectionString": "InstrumentationKey=..."
 }
 ```
 
 ### Function Apps Configuration
 
-- **Timer Schedule**: `0 0 8 27 * *` (8:00 AM UTC on 27th of each month)
+- **Timer Schedule**: `0 0 27 * *` (8:00 AM UTC on 27th of each month)
 - **Service Bus Queues**:
   - `invoice-generation-queue`
-  - `email-notification-queue`
-  - `payment-notification-queue`
+  - `invoice-email-notification-queue`
 
 ## 📊 Monitoring & Observability
 
@@ -339,9 +330,8 @@ The Bicep template deploys:
 - Storage Account with containers
 - Service Bus with queues
 - Application Insights workspace
-- Key Vault for secrets
 - App Service Plans (Linux)
-- Function Apps with managed identity
+- Function Apps with connection string authentication
 
 ### Build Optimization
 
@@ -354,13 +344,10 @@ The deployment scripts include:
 
 ## 🔐 Security Features
 
-- **Managed Identity**: Azure resources authentication
-- **Key Vault Integration**: Secure secrets management
+- **Connection String Authentication**: Azure resources authentication via connection strings
 - **Virtual Network Integration**: Network-level security
-- **Connection String Security**: No hardcoded credentials
-- **RBAC**: Role-based access control
+- **Connection String Security**: No hardcoded credentials, stored in app settings
 - **SSL/TLS**: Encrypted communication
-- **API Gateway**: Centralized security policies
 
 ## 📈 Performance Characteristics
 
@@ -407,46 +394,12 @@ The deployment scripts include:
 
 ### Key Endpoints
 
-- `GET /api/v1/user/{personalId}` - User insurance overview
-- `POST /api/v1/insurance` - Create new insurance
-- `GET /api/v1/insurance/{id}/invoices` - Retrieve invoices
-- `POST /api/v1/vehicle` - Register vehicle
-- `GET /api/v1/policies` - Available policies
-
-## 🔄 CI/CD Pipeline
-
-### Build Process
-
-1. **Code Quality**: Static analysis and linting
-2. **Unit Tests**: Automated test execution
-3. **Integration Tests**: API and database testing
-4. **Security Scan**: Vulnerability assessment
-5. **Build Optimization**: Size and performance optimization
-6. **Artifact Creation**: Deployment packages
-
-### Deployment Stages
-
-1. **Development**: Automatic deployment on feature branches
-2. **Staging**: Pre-production validation environment
-3. **Production**: Manual approval with blue-green deployment
-
-## 📞 Support & Maintenance
-
-### Monitoring Alerts
-
-- **Service Availability**: 99.9% uptime SLA
-- **Response Time**: <500ms P95 response time
-- **Error Rate**: <1% error threshold
-- **Resource Usage**: CPU/Memory thresholds
-
-### Backup & Recovery
-
-- **Database Backups**: Daily automated backups with 30-day retention
-- **Point-in-Time Recovery**: 7-day recovery window
-- **Document Storage**: Geo-redundant storage with versioning
-- **Configuration Backup**: Infrastructure as Code in source control
-
----
+- `GET /insurances/user/{personalId}` - User insurance overview
+- `POST /insurances` - Create new vehicle insurance
+- `GET /insurances/{id}` - Retrieve insurance details
+- `POST /vehicles` - Register vehicle
+- `GET /vehicles` - List vehicles
+- `GET /health` - Service health checks
 
 ## 🏷️ Version Information
 
